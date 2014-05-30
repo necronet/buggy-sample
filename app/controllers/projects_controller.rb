@@ -2,13 +2,18 @@ class ProjectsController < ApplicationController
 	respond_to :json
 
 	def index
-		respond_with(Project.all)
+		@projects = Project.all
 	end
 
 	def create
 		project = Project.new(project_params)
 		project.save
 		respond_with(project)
+	end
+
+	def show
+		@project = Project.find(params[:id])
+		respond_with(@project)
 	end
 
 	private
