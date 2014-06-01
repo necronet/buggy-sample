@@ -4,6 +4,10 @@ class App.Views.Project extends Backbone.View
 	events: 
 		"click a":"showDetails"
 
+	initialize: ->
+		@listenTo @model, 'destroy', @remove
+		@listenTo @model, 'change:name', @render
+
 	showDetails: (e) ->
 		e.preventDefault()
 		App.Vent.trigger "project:show", @model
@@ -16,6 +20,17 @@ class App.Views.Project extends Backbone.View
 class App.Views.ProjectDetails extends Backbone.View
 	template: HandlebarsTemplates['app/templates/project_details']
 
+	events: 
+		"click button.destroy": "deleteProject"
+		"click button.edit": 'editProject'
+
+	editProject: ->
+		App.Vent.trigger "project:edit", @model
+
+	deleteProject: ->
+		return unless confirm("Are you sure?")
+		@model.destroy
+			success:-> App.Vent.trigger "project:destroy"
 
 	initialize: ->
 		@model.fetch()
@@ -33,17 +48,20 @@ class App.Views.NewProjects extends Backbone.View
 		"click button" : "saveProject"
 
 	initialize: ->
-		@listenTo @model, "sync", @triggerProjectCreate
+		@listenTo @model, "sync", @render
+		@model.fetch() unless @model.isNew()
+
 
 	triggerProjectCreate: ->
 		App.Vent.trigger "project:create", @model
 
 	render: ->
-		@$el.html(@template())
+		@$el.html(@template(@model.toJSON()))
 		@
 
 	saveProject: (e) ->
 		e.preventDefault()
 		@model.set name: @$("#name").val()
 		@model.set description: @$('#description').val()
-		@model.save()
+		@model.save {},
+			success: (model) -> App.Vent.trigger "project:create", model

@@ -5,9 +5,15 @@ class App.Routers.MainRouter extends Backbone.Router
 		"projects":"project"
 		"projects/new" : "newProject"
 		"projects/:id" : "showProject"
+		"projects/edit/:id" : "editProject"
+
+	editProject: (id) ->
+		@layoutViews()
+		@contentView.swapSide(new App.Views.Projects({collection : new App.Collections.Projects}))
+		m = new App.Models.Project({id: id})
+		@contentView.swapMain(new App.Views.NewProjects({ model: m } ))
 
 	showProject: (id) ->
-		console.log "Project loading"
 		@layoutViews()
 		@contentView.swapSide(new App.Views.Projects({collection : new App.Collections.Projects}))
 		m = new App.Models.Project({id: id})
